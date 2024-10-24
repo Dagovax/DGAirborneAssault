@@ -122,7 +122,7 @@ while {true} do // Main Loop
 		private _difficulty = [DGAA_AISkillLevel] call DGCore_fnc_getDifficultyByLevel;
 		if(DGAA_NoRandomBase) then
 		{
-			_camp = ["base",[]]; // no base buildings. First string will be the 'position' name
+			_camp = ["target",[]]; // no base buildings. First string will be the 'position' name
 		} else
 		{
 			_camp = [_missionPos, _difficulty] call DGCore_fnc_spawnRandomCamp;
@@ -133,8 +133,15 @@ while {true} do // Main Loop
 		};
 		
 		private _campName = _camp select 0;
-		[DGAA_MarkerText, format["A %1 is being targeted by an airborne assault! Clear the objective from enemies.", _campName], "info"] call DGCore_fnc_sendNotification;
-		private _missionLabel = DGAA_MarkerText;
+		[DGAA_MarkerText, format["A %1 is being raided by an airborne assault! Clear the objective from enemies.", _campName], "info"] call DGCore_fnc_sendNotification;
+		private ["_missionLabel"];
+		if(DGAA_BaseNameInMarker && !DGAA_NoRandomBase) then
+		{
+			_missionLabel = format["%1: %2", _campName, DGAA_MarkerText];
+		} else
+		{
+			_missionLabel = DGAA_MarkerText;
+		};
 		private _markerColor = [_difficulty, DGAA_MarkerColors] call DGCore_fnc_getMarkerColorByLevel;
 		private _markers = ["airborneAssault", _missionPos, _missionLabel, DGAA_MarkerType, DGAA_MarkerSize, DGAA_MarkerBrush, _markerColor, DGAA_MarkerTextColor] call DGCore_fnc_createMarkers;
 		private _dummy = [_missionPos] call DGCore_fnc_getDummy;
@@ -169,7 +176,7 @@ while {true} do // Main Loop
 					DGAA_StaticPositionsQueue pushBack _missionPos; // Add the mission back to the queue
 				};
 				
-				[DGAA_MarkerText, format["The paratroopers destroyed the %1 before any player could help! Mission failed.", _campName], "error"] call DGCore_fnc_sendNotification;
+				[DGAA_MarkerText, format["The paratroopers raided the %1 before any player could help! Mission failed.", _campName], "error"] call DGCore_fnc_sendNotification;
 				if(!DGAA_NoRandomBase) then
 				{
 					{
@@ -189,9 +196,8 @@ while {true} do // Main Loop
 			[format["We will try to spawn %1 loot crates!", _crateCount], DGAA_MessageName, "debug"] call DGCore_fnc_log;
 
 			private _objective = [selectRandom (DGAA_PlaneTypes), _missionPos, _planeCount, _difficulty, _troopCount, DGAA_EnableLaunchers, DGAA_PlaneSpawnDistance, _crateCount, DGAA_ForceCrate, DGAA_FlyHeightRange, DGAA_FlySpeedLimit, DGCore_Side, DGAA_PlaneAllowDamage, DGAA_PlaneSetCaptive] call DGCore_fnc_spawnAirborneAssault;			
-			private _sirensSound = false;
 			
-			[DGAA_MarkerText, format["The assault on the %1 started! Enemy planes incoming!", _campName], "info"] call DGCore_fnc_sendNotification;
+			[DGAA_MarkerText, format["The raid on the %1 started! Enemy planes incoming!", _campName], "info"] call DGCore_fnc_sendNotification;
 			
 			// Now spawn ground vehicle if present
 			if(DGAA_SpawnGroundVehicle) then
@@ -218,12 +224,16 @@ while {true} do // Main Loop
 				};
 			};
 			
+			private _sirensSound = false;
+			private _currGroupCount = count _allGroups; // Ground vehicles are already spawned now. 
 			// Wait until we have a main group with units...
+			_planes = _objective getVariable ["DGCore_AirborneAssaultPlanes", []];
+			[format["Raid started. We have %1 spawned planes flying to the mission", count _planes], DGAA_MessageName, "debug"] call DGCore_fnc_log;
 			while {true} do
 			{
 				_allGroups = _objective getVariable ["DGCore_AIGroups", []];
 				_planes = _objective getVariable ["DGCore_AirborneAssaultPlanes", []];
-				if(_planes isEqualTo []) exitWith{}; // Not any plane spawned
+				if(_planes isEqualTo []) exitWith {}; // Not any plane spawned
 				
 				{
 					if(isNull _x || !alive _x) then
@@ -275,9 +285,12 @@ while {true} do // Main Loop
 					};
 				} forEach _planes;
 				
-				if(_planes isEqualTo []) exitWith{}; // Not any plane spawned
+				if(_planes isEqualTo []) exitWith
+				{
+					[format["Resulted _plane array %1 is empty! No sounds will be played...", _planes], DGAA_MessageName, "warning"] call DGCore_fnc_log;
+				}; // Not any plane spawned
 				
-				if !(_allGroups isEqualTo []) exitWith{}; // We have a main group spawn
+				if (count _allGroups > _currGroupCount) exitWith{}; // We have a main group spawn
 				
 				uiSleep 2;
 			};

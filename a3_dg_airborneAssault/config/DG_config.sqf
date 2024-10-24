@@ -56,6 +56,7 @@ DGAA_PlaneTypes =
 ];
 DGAA_PlaneAllowDamage		= true; 			// Allow damage to the assault planes AFTER they dropped their cargo. 
 DGAA_PlaneSetCaptive		= false;			// If set to true, planes will be ignored by AI. Default false
+DGAA_BaseNameInMarker		= true;				// Show the base name (if DGAA_NoRandomBase = false) in the marker's label
 DGAA_NoRandomBase			= false; 			// If set to true, no predefined camp buildings will spawn on the target position. Set this to true if you want to use custom buildings.
 DGAA_SpawnGroundVehicle		= true;				// If set to true, spawns a ground vehicle as well. Spawns outside mission zone and moves to the mission position. Check DGCore config for vehicle count + crew percentage
 DGAA_GroundVehicleSpawnDis	= 1500;				// Minimum distance in meters away from the mission the ground vehicles will spawn.
@@ -79,9 +80,9 @@ DGAA_MarkerBrush			= "SolidBorder";	// Marker brush
 DGAA_MarkerColors =								// Marker color for the different difficulty levels. DGAA_AISkillLevel will be used to pick the color per difficulty
 [ 												
 	"ColorGreen",	// low
-	"ColorOrange",	// medium
-	"ColorEast",	// high
-	"ColorBlack"	// veteran
+	"ColorYellow",	// medium
+	"ColorOrange",	// high
+	"ColorEast"		// veteran
 ];
 	
 DGAA_MarkerText				= "Airborne Assault"; 			// Marker text
